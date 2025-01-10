@@ -3,25 +3,19 @@
 #endif
 
 
-int Transmetteur; // Pin du capteur
-float TensionMin = 0 ; // Tension minimum de sortie proportionnel au Capteur (équivalent au 0bar)
-float TensionMax = 5.0 ; // Tension maximum de sortie proportionnel au Capteur (équivalent au 10bar)
-float PlageCapteurMin = 0 ; // Valeur basse du transmetteur (par défaut capteur 0-10bar)
-float PlageCapteurMax = 10 ; // Valeur haute du transmetteur (par défaut capteur 0-10bar)
-
 Capteurs::Capteurs(int transmetteur)
   {
-      Transmetteur = transmetteur ;
-      pinMode(Transmetteur, INPUT);
+      this->_TransmetteurPin = transmetteur ;
+      pinMode(this->_TransmetteurPin, INPUT);
   }
 
-  // Modifie les paramètres de calcul de la Capteurs
+  // Modifie les paramètres du Capteur
   void Capteurs::SetParametre(float tensionMin, float tensionMax, float plageCapteurMin, float plageCapteurMax)
   {
-    TensionMin = tensionMin ;
-    TensionMax = tensionMax ; 
-    PlageCapteurMin = plageCapteurMin ; 
-    PlageCapteurMax = plageCapteurMax ;
+    this->_TensionMin = tensionMin ;
+    this->_TensionMax = tensionMax ; 
+    this->_PlageCapteurMin = plageCapteurMin ; 
+    this->_PlageCapteurMax = plageCapteurMax ;
   }
 
 
@@ -38,16 +32,16 @@ Capteurs::Capteurs(int transmetteur)
   float Capteurs::Value()
   {
     // Convertie la valeur analogique en Volt.
-    float resultVolts = (analogRead(Transmetteur) / 1023.0 )* 5.0 ;
-    
-    // Returne la valeur du Capteurs.
-    return ((resultVolts-TensionMin) * (PlageCapteurMax - PlageCapteurMin ) / (TensionMax - TensionMin)) ;
+    float result = (analogRead(this->_TransmetteurPin) / this->_TENSION_DE_REF_ADC )* this->_TensionDeRef ;
+    // Retourne la valeur du Capteurs.
+    result = ((result-this->_TensionMin) * (this->_PlageCapteurMax - this->_PlageCapteurMin ) / (this->_TensionMax - this->_TensionMin)) ;
+    return max(min(result, this->_PlageCapteurMax), this->_PlageCapteurMin);
   }
 
 
   float Capteurs::Pourcentage()
   {
-    return ( (Value() * 100) / PlageCapteurMax);
+    return ( (Value() * 100) / this->_PlageCapteurMax);
   }
 
 
